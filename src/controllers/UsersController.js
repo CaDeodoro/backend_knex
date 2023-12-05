@@ -7,7 +7,7 @@ const { Database } = require("sqlite");
 class UsersController {
 async create(request, response) {
   const { name, email, password } = request.body;
-
+  
   const database = await sqliteConnection();
   const checkUserExists = await database.get("SELECT * FROM users WHERE email = (?)", [email]);
 
@@ -28,10 +28,11 @@ async create(request, response) {
 
   async update(request, response) {
     const {name, email, password, old_password} = request.body;
-    const { id } = request.params;
+    console.log(request.body);
+    const user_id = request.user.id;
 
     const database = await sqliteConnection();
-    const user = await database.get("SELECT * FROM users WHERE id = (?)", [id]);
+    const user = await database.get("SELECT * FROM users WHERE id = (?)", [user_id]);
 
     if (!user) {
       throw new AppError("Usuário não encontrado");
@@ -67,7 +68,7 @@ async create(request, response) {
       password = ?,
       updated_at = DATETIME('now')
       WHERE id = ?`,
-      [user.name, user.email, user.password, id]
+      [user.name, user.email, user.password, user_id]
       );
 
       return response.status(200).json();
@@ -78,12 +79,3 @@ async create(request, response) {
 
 module.exports = UsersController;
 
-
-  /**
-   * Cada controller poderá ter no maximo 5 metodos
-   * index - GET para listar vários usuários
-   * show - GET para exibir um registro específico
-   * create - POST para criar um registro
-   * update - PUT atualizar um registro
-   * delete - DELETE remover um registro 
-   */
